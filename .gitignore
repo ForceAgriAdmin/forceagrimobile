@@ -45,7 +45,7 @@ unlinked.ds
 unlinked_spec.ds
 
 # Firebase options (do not commit API keys)
-lib/firebase_options.dart
+**/firebase_options.dart
 
 # Android related
 **/android/**/gradle-wrapper.jar

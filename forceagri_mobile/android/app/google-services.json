@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "526162217915",
+    "project_id": "forceagri-46988",
+    "storage_bucket": "forceagri-46988.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:526162217915:android:b668010b74ef4914f8529e",
+        "android_client_info": {
+          "package_name": "com.example.forceagri"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDcfxAM1I06pRhcX3nLgi7Bvw39vtU_c1w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:526162217915:android:f37a2348e8d9e1c0f8529e",
+        "android_client_info": {
+          "package_name": "com.example.forceagri_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDcfxAM1I06pRhcX3nLgi7Bvw39vtU_c1w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

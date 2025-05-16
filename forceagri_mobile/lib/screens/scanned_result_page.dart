@@ -161,7 +161,7 @@ class ScannedResultPage extends ConsumerWidget {
 
 
 class _ChangeOperationPage extends StatelessWidget {
-  const _ChangeOperationPage({super.key});
+  const _ChangeOperationPage();
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(title: const Text('Change Operation')),
@@ -170,7 +170,7 @@ class _ChangeOperationPage extends StatelessWidget {
 }
 
 class _SettlePage extends StatelessWidget {
-  const _SettlePage({super.key});
+  const _SettlePage();
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(title: const Text('Settle')),

@@ -51,6 +51,16 @@ class TransactionService {
         .toList();
   }
 
+  Stream<List<TransactionModel>> watchAllTransactions() {
+    return _db
+      .collection('transactions')
+      .orderBy('timestamp', descending: true)
+      .snapshots()
+      .map((snap) =>
+        snap.docs.map((doc) => TransactionModel.fromDoc(doc)).toList()
+      );
+  }
+
   /// Real-time stream of transaction types.
   Stream<List<TransactionTypeModel>> watchTransactionTypes() {
     return _db

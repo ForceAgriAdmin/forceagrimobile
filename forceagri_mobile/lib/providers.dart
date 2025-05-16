@@ -1,6 +1,7 @@
 // lib/providers.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:forceagri_mobile/models/transaction_model.dart';
 
 import 'services/auth_service.dart';
 import 'services/card_service.dart';
@@ -32,4 +33,17 @@ final bottomNavIndexProvider = StateProvider<int>((ref) => 0);
 final transactionTypesProvider =
     Provider<List<TransactionTypeModel>>((ref) {
   return ref.watch(firestoreSyncServiceProvider).transactionTypes;
+});
+
+/// New: filter options
+enum TransactionFilter { today, yesterday, thisWeek, all }
+
+/// Holds the currently selected filter
+final transactionFilterProvider =
+    StateProvider<TransactionFilter>((_) => TransactionFilter.today);
+
+/// Streams all transactions
+final allTransactionsProvider =
+    StreamProvider<List<TransactionModel>>((ref) {
+  return ref.read(transactionServiceProvider).watchAllTransactions();
 });

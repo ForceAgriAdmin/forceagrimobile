@@ -15,6 +15,7 @@ class TransactionsPage extends ConsumerWidget {
     final filter    = ref.watch(transactionFilterProvider);
     final txnsAsync = ref.watch(allTransactionsProvider);
     final sync      = ref.watch(firestoreSyncServiceProvider);
+    final query     = ref.watch(transactionSearchProvider).toLowerCase();
 
     DateTime startOfDay(DateTime d) => DateTime(d.year, d.month, d.day);
 
@@ -37,11 +38,30 @@ class TransactionsPage extends ConsumerWidget {
             ? startOfDay(DateTime.now())
             : DateTime.now();
 
-    List<TransactionModel> applyFilter(List<TransactionModel> list) {
+    List<TransactionModel> applyDateFilter(List<TransactionModel> list) {
       final s = startDate(), e = endDate();
       return list.where((t) {
         final ts = t.timestamp;
         return !ts.isBefore(s) && !ts.isAfter(e);
+      }).toList();
+    }
+
+    List<TransactionModel> applySearch(List<TransactionModel> list) {
+      if (query.isEmpty) return list;
+      final fmtDate = DateFormat('yyyy-MM-dd');
+      return list.where((t) {
+        final worker = sync.workers.firstWhere((w) => w.id == t.workerId);
+        final operation = sync.operations.firstWhere((o) => o.id == t.operationId);
+        final name = '${worker.firstName} ${worker.lastName}'.toLowerCase();
+        final opName = operation.name.toLowerCase();
+        final id = t.id.toLowerCase();
+        final dateStr = fmtDate.format(t.timestamp).toLowerCase();
+        final amtStr = t.amount.abs().toStringAsFixed(2).toLowerCase();
+        return name.contains(query) ||
+               opName.contains(query) ||
+               id.contains(query) ||
+               dateStr.contains(query) ||
+               amtStr.contains(query);
       }).toList();
     }
 
@@ -52,45 +72,67 @@ class TransactionsPage extends ConsumerWidget {
               ref.read(transactionFilterProvider.notifier).state = value,
         );
 
-    final fmtDate = DateFormat('yyyy-MM-dd');
+    final fmtDisplayDate = DateFormat('yyyy-MM-dd');
 
     return Scaffold(
       body: txnsAsync.when(
         data: (txns) {
-          final list = applyFilter(txns);
+          // apply filters
+          var list = applyDateFilter(txns);
+          list = applySearch(list);
+
           return Column(
             children: [
+              // Search bar
               Padding(
                 padding: const EdgeInsets.all(8),
+                child: TextField(
+                  decoration: const InputDecoration(
+                    labelText: 'Search transactions',
+                    prefixIcon: Icon(Icons.search),
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (v) =>
+                      ref.read(transactionSearchProvider.notifier).state = v,
+                ),
+              ),
+
+              // Filter chips
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Wrap(
                   spacing: 8,
                   children: [
+                    chip('All', TransactionFilter.all),
                     chip('Today', TransactionFilter.today),
                     chip('Yesterday', TransactionFilter.yesterday),
                     chip('This Week', TransactionFilter.thisWeek),
-                    chip('All', TransactionFilter.all),
                   ],
                 ),
               ),
+
+              // List
               Expanded(
                 child: ListView.separated(
                   itemCount: list.length,
                   separatorBuilder: (_, __) => const Divider(),
                   itemBuilder: (ctx, i) {
                     final t = list[i];
-                    final worker = sync.workers.firstWhere((w) => w.id == t.workerId);
+                    final worker    = sync.workers.firstWhere((w) => w.id == t.workerId);
                     final operation = sync.operations.firstWhere((o) => o.id == t.operationId);
-                    final color = t.amount < 0 ? Colors.red : Colors.green;
+                    final color     = t.amount < 0 ? Colors.red : Colors.green;
 
                     return ListTile(
                       leading: CircleAvatar(
-                        backgroundImage: NetworkImage(worker.profileImageUrl),
+                        backgroundImage:
+                            NetworkImage(worker.profileImageUrl),
                         backgroundColor: Colors.grey.shade200,
                       ),
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => TransactionDetailPage(txn: t),
+                          builder: (_) =>
+                              TransactionDetailPage(txn: t),
                         ),
                       ),
                       title: Row(
@@ -107,7 +149,7 @@ class TransactionsPage extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(operation.name),
-                          Text(fmtDate.format(t.timestamp)),
+                          Text(fmtDisplayDate.format(t.timestamp)),
                         ],
                       ),
                     );
@@ -118,7 +160,7 @@ class TransactionsPage extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error:   (e, _) => Center(child: Text('Error: $e')),
       ),
     );
   }

@@ -1,84 +1,90 @@
-// lib/screens/scanned_result_page.dart
+// lib/screens/worker_detail_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forceagri_mobile/screens/transaction_page.dart';
 
-import '../models/qr_data.dart';
-import '../models/card_model.dart';
+import '../models/worker_model.dart';
 import '../models/operation_model.dart';
 import '../models/farm_model.dart';
+import '../models/worker_type_model.dart';
 import '../providers.dart';
+import 'transaction_page.dart';
 
-class ScannedResultPage extends ConsumerWidget {
-  final QRData qrData;
-  final CardModel card;
-
-  const ScannedResultPage({
-    required this.qrData,
-    required this.card,
-    super.key,
-  });
+class WorkerDetailPage extends ConsumerWidget {
+  final WorkerModel worker;
+  const WorkerDetailPage({required this.worker, super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final sync = ref.watch(firestoreSyncServiceProvider);
-    final worker = sync.workers.firstWhere((w) => w.id == qrData.workerId);
+
+    // look up related records, fallback to “Unknown”
     final operation = sync.operations.firstWhere(
       (o) => o.id == worker.operationId,
       orElse: () => OperationModel(
-        id: '',
-        name: 'Unknown',
-        description: '',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+        id: '', name: 'Unknown', description: '',
+        createdAt: DateTime.now(), updatedAt: DateTime.now(),
       ),
     );
     final farm = sync.farms.firstWhere(
       (f) => f.id == worker.farmId,
       orElse: () => FarmModel(
-        id: '',
-        name: 'Unknown',
-        location: '',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+        id: '', name: 'Unknown', location: '',
+        createdAt: DateTime.now(), updatedAt: DateTime.now(),
       ),
     );
-
-    final primary = Theme.of(context).colorScheme.primary;
+    final workerType = sync.workerTypes.firstWhere(
+      (t) => t.id == worker.workerTypeId,
+      orElse: () => WorkerTypeModel(id: '', description: 'Unknown'),
+    );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Scanned Worker Details')),
+      appBar: AppBar(title: const Text('Worker Details')),
       body: Column(
         children: [
-          // Top section
+          // Top section (identical to ScannedResultPage)
           Expanded(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
                 child: Column(
                   children: [
                     CircleAvatar(
-                      radius: 120,
-                      backgroundImage: NetworkImage(worker.profileImageUrl),
+                      radius: 64,
+                      backgroundImage:
+                          NetworkImage(worker.profileImageUrl),
                       backgroundColor: Colors.grey.shade200,
                     ),
                     const SizedBox(height: 16),
                     Text(
                       '${worker.firstName} ${worker.lastName}',
-                      style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge!
+                          .copyWith(fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 8),
-                    Text('Employee #: ${worker.employeeNumber}',
-                        style: Theme.of(context).textTheme.bodyMedium),
-                    Text('ID #:         ${worker.idNumber}',
-                        style: Theme.of(context).textTheme.bodyMedium),
+                    Text(
+                      'Employee #: ${worker.employeeNumber}',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    Text(
+                      'ID #:         ${worker.idNumber}',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
                     const SizedBox(height: 8),
-                    Text('Operation: ${operation.name}',
-                        style: Theme.of(context).textTheme.bodyMedium),
-                    Text('Farm:       ${farm.name}',
-                        style: Theme.of(context).textTheme.bodyMedium),
+                    Text(
+                      'Type:       ${workerType.description}',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    Text(
+                      'Operation:  ${operation.name}',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    Text(
+                      'Farm:       ${farm.name}',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
                   ],
                 ),
               ),
@@ -88,7 +94,7 @@ class ScannedResultPage extends ConsumerWidget {
           // Divider
           const Divider(height: 1),
 
-          // Bottom action panel
+          // Bottom actions (identical style)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: Column(
@@ -100,18 +106,26 @@ class ScannedResultPage extends ConsumerWidget {
                       label: 'Transact',
                       onTap: () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => TransactionPage(worker: worker)),
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              TransactionPage(worker: worker),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 16),
                     _buildActionButton(
                       context,
                       label: 'Change Operation',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const _ChangeOperationPage()),
-                      ),
+                      onTap: () {
+                        // replace with your real page
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const _ChangeOperationPage(),
+                          ),
+                        );
+                      },
                       minWidth: 140,
                     ),
                   ],
@@ -122,10 +136,15 @@ class ScannedResultPage extends ConsumerWidget {
                     _buildActionButton(
                       context,
                       label: 'Settle',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const _SettlePage()),
-                      ),
+                      onTap: () {
+                        // replace with your real page
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const _SettlePage(),
+                          ),
+                        );
+                      },
                       minWidth: 120,
                     ),
                   ],
@@ -157,8 +176,6 @@ class ScannedResultPage extends ConsumerWidget {
     );
   }
 }
-
-
 
 class _ChangeOperationPage extends StatelessWidget {
   const _ChangeOperationPage();

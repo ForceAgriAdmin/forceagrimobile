@@ -1,13 +1,14 @@
 // lib/providers.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:forceagri_mobile/models/transaction_model.dart';
 
+import 'models/transaction_model.dart';
+import 'models/transaction_type_model.dart';
+import 'models/worker_type_model.dart';
 import 'services/auth_service.dart';
 import 'services/card_service.dart';
 import 'services/firestore_sync_service.dart';
 import 'services/transaction_service.dart';
-import 'models/transaction_type_model.dart';
 
 /// 1️⃣ Core services
 final firestoreSyncServiceProvider =
@@ -25,7 +26,7 @@ final transactionServiceProvider =
 final cardServiceProvider = Provider<CardService>((ref) => CardService());
 
 /// 2️⃣ UI state
-final rememberMeProvider = StateProvider<bool>((ref) => false);
+final rememberMeProvider     = StateProvider<bool>((ref) => false);
 final bottomNavIndexProvider = StateProvider<int>((ref) => 0);
 
 /// 3️⃣ Transaction types (offline‐cached)
@@ -35,15 +36,29 @@ final transactionTypesProvider =
   return ref.watch(firestoreSyncServiceProvider).transactionTypes;
 });
 
-/// New: filter options
+/// 4️⃣ Transaction filtering & search
 enum TransactionFilter { today, yesterday, thisWeek, all }
 
-/// Holds the currently selected filter
 final transactionFilterProvider =
-    StateProvider<TransactionFilter>((_) => TransactionFilter.today);
+    StateProvider<TransactionFilter>((ref) => TransactionFilter.today);
+
+/// Holds the current search query for transactions
+final transactionSearchProvider = StateProvider<String>((ref) => '');
 
 /// Streams all transactions
 final allTransactionsProvider =
     StreamProvider<List<TransactionModel>>((ref) {
   return ref.read(transactionServiceProvider).watchAllTransactions();
+});
+
+/// 5️⃣ Worker filtering & search
+/// Filter by workerTypeId (null = All)
+final workerTypeFilterProvider = StateProvider<String?>((ref) => null);
+
+/// Holds the current search query for workers
+final workerSearchProvider = StateProvider<String>((ref) => '');
+
+/// The list of worker types (from sync service)
+final workerTypesProvider = Provider<List<WorkerTypeModel>>((ref) {
+  return ref.watch(firestoreSyncServiceProvider).workerTypes;
 });

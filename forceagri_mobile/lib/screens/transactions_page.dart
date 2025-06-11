@@ -50,8 +50,8 @@ class TransactionsPage extends ConsumerWidget {
       if (query.isEmpty) return list;
       final fmtDate = DateFormat('yyyy-MM-dd');
       return list.where((t) {
-        final worker = sync.workers.firstWhere((w) => w.id == t.workerId);
-        final operation = sync.operations.firstWhere((o) => o.id == t.operationId);
+        final worker = sync.workers.firstWhere((w) => w.id == t.workerIds[0]);
+        final operation = sync.operations.firstWhere((o) => o.id == t.operationIds[0]);
         final name = '${worker.firstName} ${worker.lastName}'.toLowerCase();
         final opName = operation.name.toLowerCase();
         final id = t.id.toLowerCase();
@@ -118,8 +118,8 @@ class TransactionsPage extends ConsumerWidget {
                   separatorBuilder: (_, __) => const Divider(),
                   itemBuilder: (ctx, i) {
                     final t = list[i];
-                    final worker    = sync.workers.firstWhere((w) => w.id == t.workerId);
-                    final operation = sync.operations.firstWhere((o) => o.id == t.operationId);
+                    final worker    = sync.workers.firstWhere((w) => w.id == t.workerIds[0]);
+                    final operation = sync.operations.firstWhere((o) => o.id == t.operationIds[0]);
                     final color     = t.amount < 0 ? Colors.red : Colors.green;
 
                     return ListTile(

@@ -16,11 +16,11 @@ class TransactionDetailPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final sync      = ref.watch(firestoreSyncServiceProvider);
-    final worker    = sync.workers.firstWhere((w) => w.id == txn.workerId);
-    final operation = sync.operations.firstWhere((o) => o.id == txn.operationId);
+    final worker    = sync.workers.firstWhere((w) => w.id == txn.workerIds[0]);
+    final operation = sync.operations.firstWhere((o) => o.id == txn.operationIds[0]);
     final fmtDate   = DateFormat('yyyy-MM-dd HH:mm');
 
-    void _viewReceipt() {
+    void viewReceipt() {
       final doc = pw.Document();
       doc.addPage(
         pw.Page(
@@ -86,7 +86,7 @@ class TransactionDetailPage extends ConsumerWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _viewReceipt,
+                onPressed: viewReceipt,
                 child: const Text('View Receipt'),
               ),
             ),

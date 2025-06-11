@@ -5,24 +5,28 @@ class TransactionModel {
   final DateTime timestamp;
   final double amount;
   final String description;
-  final String operationId;
+  //final String farmId;
   final String creatorId;
   final String transactionTypeId;
-  final String workerId;
   final String function;
-  final List<String> multiWorkerId;
+  final List<String> workerTypesIds;
+  final List<String> operationIds;
+  final List<String> workerIds;
+  final List<String> paymentGroupIds;
 
   TransactionModel({
     required this.id,
     required this.timestamp,
     required this.amount,
     required this.description,
-    required this.operationId,
+    //required this.farmId,
     required this.creatorId,
     required this.transactionTypeId,
-    required this.workerId,
     required this.function,
-    required this.multiWorkerId,
+    required this.workerTypesIds,
+    required this.operationIds,
+    required this.workerIds,
+    required this.paymentGroupIds,
   });
 
   factory TransactionModel.fromDoc(DocumentSnapshot doc) {
@@ -32,12 +36,14 @@ class TransactionModel {
       timestamp:          (data['timestamp']        as Timestamp).toDate(),
       amount:             (data['amount']           as num).toDouble(),
       description:        data['description']       as String,
-      operationId:        data['operationId']       as String,
+     // farmId:             data['farmId']            as String,
       creatorId:          data['creatorId']         as String,
       transactionTypeId:  data['transactionTypeId'] as String,
-      workerId:           data['workerId']          as String,
       function:           data['function']          as String,
-      multiWorkerId:      List<String>.from(data['multiWorkerId'] as List),
+      workerTypesIds:     List<String>.from(data['workerTypesIds'] as List),
+      operationIds:       List<String>.from(data['operationIds'] as List),
+      workerIds:          List<String>.from(data['workerIds'] as List),
+      paymentGroupIds:    List<String>.from(data['paymentGroupIds'] as List),
     );
   }
 }

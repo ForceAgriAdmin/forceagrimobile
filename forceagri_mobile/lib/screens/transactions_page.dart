@@ -16,6 +16,10 @@ class TransactionsPage extends ConsumerWidget {
     final txnsAsync = ref.watch(allTransactionsProvider);
     final sync      = ref.watch(firestoreSyncServiceProvider);
     final query     = ref.watch(transactionSearchProvider).toLowerCase();
+    final types     = ref.watch(transactionTypesProvider)
+      .where((t) => t.name.toLowerCase() != 'settle')
+      .toList();
+    final typeMap   = { for (var t in types) t.id: t.name };
 
     DateTime startOfDay(DateTime d) => DateTime(d.year, d.month, d.day);
 
@@ -75,11 +79,14 @@ class TransactionsPage extends ConsumerWidget {
     final fmtDisplayDate = DateFormat('yyyy-MM-dd');
 
     return Scaffold(
+      appBar: AppBar(title: const Text('All Transactions')),
       body: txnsAsync.when(
         data: (txns) {
           // apply filters
           var list = applyDateFilter(txns);
           list = applySearch(list);
+          // remove 'settle' transactions
+          list = list.where((t) => typeMap.containsKey(t.transactionTypeId)).toList();
 
           return Column(
             children: [
@@ -120,6 +127,7 @@ class TransactionsPage extends ConsumerWidget {
                     final t = list[i];
                     final worker    = sync.workers.firstWhere((w) => w.id == t.workerIds[0]);
                     final operation = sync.operations.firstWhere((o) => o.id == t.operationIds[0]);
+                    final typeName  = typeMap[t.transactionTypeId] ?? '';
                     final color     = t.amount < 0 ? Colors.red : Colors.green;
 
                     return ListTile(
@@ -131,8 +139,7 @@ class TransactionsPage extends ConsumerWidget {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) =>
-                              TransactionDetailPage(txn: t),
+                          builder: (_) => TransactionDetailPage(txn: t),
                         ),
                       ),
                       title: Row(
@@ -145,11 +152,17 @@ class TransactionsPage extends ConsumerWidget {
                           ),
                         ],
                       ),
-                      subtitle: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(operation.name),
-                          Text(fmtDisplayDate.format(t.timestamp)),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(operation.name),
+                              Text(fmtDisplayDate.format(t.timestamp)),
+                            ],
+                          ),
+                          Text(typeName),
                         ],
                       ),
                     );
@@ -165,3 +178,4 @@ class TransactionsPage extends ConsumerWidget {
     );
   }
 }
+

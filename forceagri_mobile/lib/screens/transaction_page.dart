@@ -1,4 +1,3 @@
-// lib/screens/transaction_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,9 +15,9 @@ class TransactionPage extends ConsumerStatefulWidget {
 }
 
 class _TransactionPageState extends ConsumerState<TransactionPage> {
-  final _formKey     = GlobalKey<FormState>();
+  final _formKey    = GlobalKey<FormState>();
   TransactionTypeModel? _selectedType;
-  final _amountCtrl  = TextEditingController();
+  final _amountCtrl = TextEditingController();
 
   @override
   void dispose() {
@@ -29,13 +28,12 @@ class _TransactionPageState extends ConsumerState<TransactionPage> {
   void _submit() {
     if (_selectedType == null || !_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please pick a type and a valid amount')),
+        const SnackBar(content: Text('Please pick a type and enter a valid amount')),
       );
       return;
     }
     final amount = double.parse(_amountCtrl.text);
 
-    // Fire-and-forget; backend sync happens automatically (offline too)
     ref.read(transactionServiceProvider).addTransactionForWorker(
       worker: widget.worker,
       transactionType: _selectedType!,
@@ -43,11 +41,9 @@ class _TransactionPageState extends ConsumerState<TransactionPage> {
       creatorId: ref.read(authStateProvider).value!.uid,
       description: '',
     ).catchError((e) {
-      // Optionally log or report errors, but don't block the UI
       debugPrint('Transaction sync error: $e');
     });
 
-    // Immediately give feedback & pop
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -60,7 +56,9 @@ class _TransactionPageState extends ConsumerState<TransactionPage> {
 
   @override
   Widget build(BuildContext context) {
-    final types = ref.watch(transactionTypesProvider);
+    // filter out "settle" from the list
+    final allTypes = ref.watch(transactionTypesProvider);
+    final types = allTypes.where((t) => t.name.toLowerCase() != 'settle').toList();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Transaction')),

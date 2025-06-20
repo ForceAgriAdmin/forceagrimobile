@@ -1,4 +1,3 @@
-// lib/screens/worker_detail_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,7 +16,6 @@ class WorkerDetailPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final sync = ref.watch(firestoreSyncServiceProvider);
 
-    // look up related records, fallback to “Unknown”
     final operation = sync.operations.firstWhere(
       (o) => o.id == worker.operationId,
       orElse: () => OperationModel(
@@ -25,6 +23,7 @@ class WorkerDetailPage extends ConsumerWidget {
         createdAt: DateTime.now(), updatedAt: DateTime.now(),
       ),
     );
+
     final farm = sync.farms.firstWhere(
       (f) => f.id == worker.farmId,
       orElse: () => FarmModel(
@@ -32,6 +31,7 @@ class WorkerDetailPage extends ConsumerWidget {
         createdAt: DateTime.now(), updatedAt: DateTime.now(),
       ),
     );
+
     final workerType = sync.workerTypes.firstWhere(
       (t) => t.id == worker.workerTypeId,
       orElse: () => WorkerTypeModel(id: '', description: 'Unknown'),
@@ -40,61 +40,51 @@ class WorkerDetailPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Worker Details')),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Top section (identical to ScannedResultPage)
           Expanded(
-            child: Center(
-              child: SingleChildScrollView(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-                child: Column(
-                  children: [
-                    CircleAvatar(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: CircleAvatar(
                       radius: 64,
-                      backgroundImage:
-                          NetworkImage(worker.profileImageUrl),
+                      backgroundImage: NetworkImage(worker.profileImageUrl),
                       backgroundColor: Colors.grey.shade200,
                     ),
-                    const SizedBox(height: 16),
-                    Text(
+                  ),
+                  const SizedBox(height: 16),
+                  Center(
+                    child: Text(
                       '${worker.firstName} ${worker.lastName}',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge!
-                          .copyWith(fontWeight: FontWeight.w600),
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text('Employee #: ${worker.employeeNumber}'),
+                  const SizedBox(height: 8),
+                  Text('ID #:           ${worker.idNumber}'),
+                  const SizedBox(height: 8),
+                  Text('Type:          ${workerType.description}'),
+                  const SizedBox(height: 8),
+                  Text('Operation:     ${operation.name}'),
+                  const SizedBox(height: 8),
+                  Text('Farm:          ${farm.name}'),
+                  const SizedBox(height: 8),
+                  Text('Status:        ${worker.isActive ? 'Active' : 'Inactive'}'),
+                  if (worker.paymentGroupIds.isNotEmpty) ...[
                     const SizedBox(height: 8),
-                    Text(
-                      'Employee #: ${worker.employeeNumber}',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    Text(
-                      'ID #:         ${worker.idNumber}',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Type:       ${workerType.description}',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    Text(
-                      'Operation:  ${operation.name}',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    Text(
-                      'Farm:       ${farm.name}',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
+                    Text('Payment Groups: ${worker.paymentGroupIds.length}'),
                   ],
-                ),
+                ],
               ),
             ),
           ),
 
-          // Divider
           const Divider(height: 1),
 
-          // Bottom actions (identical style)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: Column(
@@ -107,8 +97,7 @@ class WorkerDetailPage extends ConsumerWidget {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) =>
-                              TransactionPage(worker: worker),
+                          builder: (_) => TransactionPage(worker: worker),
                         ),
                       ),
                     ),
@@ -116,16 +105,10 @@ class WorkerDetailPage extends ConsumerWidget {
                     _buildActionButton(
                       context,
                       label: 'Change Operation',
-                      onTap: () {
-                        // replace with your real page
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                const _ChangeOperationPage(),
-                          ),
-                        );
-                      },
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const _ChangeOperationPage()),
+                      ),
                       minWidth: 140,
                     ),
                   ],
@@ -136,15 +119,10 @@ class WorkerDetailPage extends ConsumerWidget {
                     _buildActionButton(
                       context,
                       label: 'Settle',
-                      onTap: () {
-                        // replace with your real page
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const _SettlePage(),
-                          ),
-                        );
-                      },
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const _SettlePage()),
+                      ),
                       minWidth: 120,
                     ),
                   ],

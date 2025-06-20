@@ -1,4 +1,3 @@
-// lib/services/firestore_sync_service.dart
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
@@ -31,50 +30,56 @@ class FirestoreSyncService extends ChangeNotifier {
       _farmsSub;
 
   FirestoreSyncService() {
-    // 1) Enable offline persistence (on mobile it's on by default, but safe to call.)
+    // 1) Enable offline persistence
     _db.settings = const Settings(persistenceEnabled: true);
 
-    // 2) Attach real-time listeners
+    // 2) Attach real-time listeners with debug prints
     _cardsSub = _db.collection('cards').snapshots().listen((snap) {
+      debugPrint('🃏 cards snapshot: ${snap.docs.length}');
       cards = snap.docs.map((d) => CardModel.fromDoc(d)).toList();
       notifyListeners();
     });
 
     _workersSub = _db.collection('workers').snapshots().listen((snap) {
+      debugPrint('👷 workers snapshot: ${snap.docs.length}');
       workers = snap.docs.map((d) => WorkerModel.fromDoc(d)).toList();
+      debugPrint('👷 parsed workers: ${workers.length}');
+      debugPrint('👷 worker IDs: ${workers.map((w) => w.id).join(', ')}');
       notifyListeners();
     });
 
     _workerTypesSub = _db.collection('workerTypes').snapshots().listen((snap) {
-      workerTypes =
-          snap.docs.map((d) => WorkerTypeModel.fromDoc(d)).toList();
+      debugPrint('📂 workerTypes snapshot: ${snap.docs.length}');
+      workerTypes = snap.docs.map((d) => WorkerTypeModel.fromDoc(d)).toList();
       notifyListeners();
     });
 
     _transactionsSub =
         _db.collection('transactions').snapshots().listen((snap) {
-      transactions =
-          snap.docs.map((d) => TransactionModel.fromDoc(d)).toList();
+      debugPrint('💰 transactions snapshot: ${snap.docs.length}');
+      transactions = snap.docs.map((d) => TransactionModel.fromDoc(d)).toList();
       notifyListeners();
     });
 
     _transactionTypesSub =
         _db.collection('transactionTypes').snapshots().listen((snap) {
-      transactionTypes =
-          snap.docs.map((d) => TransactionTypeModel.fromDoc(d)).toList();
+      debugPrint('🏷️ transactionTypes snapshot: ${snap.docs.length}');
+      transactionTypes = snap.docs
+          .map((d) => TransactionTypeModel.fromDoc(d))
+          .toList();
       notifyListeners();
     });
 
     _operationsSub =
         _db.collection('operations').snapshots().listen((snap) {
-      operations =
-          snap.docs.map((d) => OperationModel.fromDoc(d)).toList();
+      debugPrint('⚙️ operations snapshot: ${snap.docs.length}');
+      operations = snap.docs.map((d) => OperationModel.fromDoc(d)).toList();
       notifyListeners();
     });
     _farmsSub =
         _db.collection('farms').snapshots().listen((snap) {
-      farms =
-          snap.docs.map((d) => FarmModel.fromDoc(d)).toList();
+      debugPrint('🌾 farms snapshot: ${snap.docs.length}');
+      farms = snap.docs.map((d) => FarmModel.fromDoc(d)).toList();
       notifyListeners();
     });
   }

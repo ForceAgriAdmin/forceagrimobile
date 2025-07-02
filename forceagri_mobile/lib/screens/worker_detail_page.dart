@@ -1,3 +1,5 @@
+// lib/screens/worker_detail_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forceagri_mobile/widgets/profile_image.dart';
@@ -46,6 +48,10 @@ class WorkerDetailPage extends ConsumerWidget {
       orElse: () => WorkerTypeModel(id: '', description: 'Unknown'),
     );
 
+    // Format the balance
+    final balanceText =
+        'Balance: N\$${worker.currentBalance.toStringAsFixed(2)}';
+
     return Scaffold(
       appBar: AppBar(title: const Text('Worker Details')),
       body: Column(
@@ -57,12 +63,38 @@ class WorkerDetailPage extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Center(child: ProfileImage(worker: worker, radius: 64)),
                   Center(
-                    child: Center(
-                      child: ProfileImage(worker: worker, radius: 64),
+                    child: Chip(
+                      label: Text(
+                        worker.isActive ? 'Active' : 'Inactive',
+                        style: TextStyle(
+                          color:
+                              worker.isActive
+                                  ? Colors.green.shade800
+                                  : Colors.red.shade800,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      backgroundColor:
+                          worker.isActive
+                              ? Colors.green.shade100
+                              : Colors.red.shade100,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 0,
+                      ),
+                      visualDensity: VisualDensity.compact,
+                      shape: StadiumBorder(
+                        side: BorderSide(
+                          color:
+                              worker.isActive
+                                  ? Colors.green.shade800
+                                  : Colors.red.shade800,
+                        ),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 16),
                   Center(
                     child: Text(
                       '${worker.firstName} ${worker.lastName}',
@@ -70,6 +102,8 @@ class WorkerDetailPage extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
+
+                  // Existing fields
                   Text('Employee #: ${worker.employeeNumber}'),
                   const SizedBox(height: 8),
                   Text('ID #:           ${worker.idNumber}'),
@@ -80,13 +114,24 @@ class WorkerDetailPage extends ConsumerWidget {
                   const SizedBox(height: 8),
                   Text('Farm:          ${farm.name}'),
                   const SizedBox(height: 8),
-                  Text(
-                    'Status:        ${worker.isActive ? 'Active' : 'Inactive'}',
-                  ),
                   if (worker.paymentGroupIds.isNotEmpty) ...[
-                    const SizedBox(height: 8),
                     Text('Payment Groups: ${worker.paymentGroupIds.length}'),
                   ],
+
+                  const SizedBox(height: 8),
+                  // ← New balance line
+                  Text(
+                    balanceText,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color:
+                          worker.currentBalance >= 0
+                              ? Colors.green.shade700
+                              : Colors.red.shade700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                 ],
               ),
             ),
@@ -115,13 +160,7 @@ class WorkerDetailPage extends ConsumerWidget {
                     _buildActionButton(
                       context,
                       label: 'Change Operation',
-                      onTap:
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const _ChangeOperationPage(),
-                            ),
-                          ),
+                      onTap: () => {},
                       minWidth: 140,
                     ),
                   ],
@@ -132,13 +171,7 @@ class WorkerDetailPage extends ConsumerWidget {
                     _buildActionButton(
                       context,
                       label: 'Settle',
-                      onTap:
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const _SettlePage(),
-                            ),
-                          ),
+                      onTap: () => {},
                       minWidth: 120,
                     ),
                   ],
@@ -169,22 +202,4 @@ class WorkerDetailPage extends ConsumerWidget {
       child: Text(label),
     );
   }
-}
-
-class _ChangeOperationPage extends StatelessWidget {
-  const _ChangeOperationPage();
-  @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Change Operation')),
-    body: const Center(child: Text('Change Operation Page')),
-  );
-}
-
-class _SettlePage extends StatelessWidget {
-  const _SettlePage();
-  @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Settle')),
-    body: const Center(child: Text('Settle Page')),
-  );
 }

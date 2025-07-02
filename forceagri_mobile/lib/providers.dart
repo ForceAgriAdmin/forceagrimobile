@@ -1,6 +1,7 @@
 // lib/providers.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:forceagri_mobile/services/connectivity_service.dart';
 
 import 'models/transaction_model.dart';
 import 'models/transaction_type_model.dart';
@@ -61,4 +62,13 @@ final workerSearchProvider = StateProvider<String>((ref) => '');
 /// The list of worker types (from sync service)
 final workerTypesProvider = Provider<List<WorkerTypeModel>>((ref) {
   return ref.watch(firestoreSyncServiceProvider).workerTypes;
+});
+
+/// 6️⃣ Internet‐quality indicator
+final connectionQualityProvider =
+    StreamProvider<ConnectionQuality>((ref) {
+  return connectionQualityStream(
+    interval: const Duration(seconds: 10),
+    goodThresholdMs: 200,
+  );
 });

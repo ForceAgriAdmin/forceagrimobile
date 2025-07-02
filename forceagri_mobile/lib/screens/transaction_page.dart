@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forceagri_mobile/widgets/profile_image.dart';
 
 import '../models/worker_model.dart';
 import '../models/transaction_type_model.dart';
@@ -66,11 +67,7 @@ class _TransactionPageState extends ConsumerState<TransactionPage> {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            CircleAvatar(
-              radius: 64,
-              backgroundImage: NetworkImage(widget.worker.profileImageUrl),
-              backgroundColor: Colors.grey.shade200,
-            ),
+            ProfileImage(worker: widget.worker, radius: 64),
             const SizedBox(height: 16),
             Text(
               '${widget.worker.firstName} ${widget.worker.lastName}',

@@ -1,8 +1,11 @@
+// lib/screens/home_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../providers.dart';
+import '../services/connectivity_service.dart';
 import 'qr_scanner_page.dart';
 import 'workers_page.dart';
 import 'transactions_page.dart';
@@ -10,7 +13,7 @@ import 'settings_page.dart';
 
 class HomePage extends ConsumerWidget {
   final User user;
-  const HomePage({required this.user, super.key});
+  const HomePage({required this.user, Key? key}) : super(key: key);
 
   static const _tabs = <Widget>[
     Center(child: Text('Home Tab')),
@@ -36,11 +39,48 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final idx = ref.watch(bottomNavIndexProvider);
+    final connAsync = ref.watch(connectionQualityProvider);
+
+    Widget connectionIndicator() {
+      return connAsync.when(
+        data: (q) {
+          Color c;
+          switch (q) {
+            case ConnectionQuality.good:
+              c = Colors.green;
+              break;
+            case ConnectionQuality.poor:
+              c = Colors.amber;
+              break;
+            case ConnectionQuality.none:
+            default:
+              c = Colors.red;
+          }
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: Icon(Icons.circle, size: 16, color: c),
+          );
+        },
+        loading: () => const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.0),
+          child: SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+        error: (_, __) => const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.0),
+          child: Icon(Icons.offline_bolt, size: 16, color: Colors.red),
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
         title: Text(_titles[idx]),
         actions: [
+          connectionIndicator(),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () => ref.read(authServiceProvider).signOut(),
@@ -66,9 +106,11 @@ class HomePage extends ConsumerWidget {
             return Expanded(
               child: IconButton(
                 icon: Icon(_icons[i]),
-                color: idx == i ? Theme.of(context).primaryColor : Colors.grey,
-                onPressed:
-                    () => ref.read(bottomNavIndexProvider.notifier).state = i,
+                color: idx == i
+                    ? Theme.of(context).colorScheme.primary
+                    : Colors.grey,
+                onPressed: () =>
+                    ref.read(bottomNavIndexProvider.notifier).state = i,
               ),
             );
           }),

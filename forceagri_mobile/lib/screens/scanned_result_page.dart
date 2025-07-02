@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forceagri_mobile/screens/transaction_page.dart';
+import 'package:forceagri_mobile/widgets/profile_image.dart';
 
 import '../models/qr_data.dart';
 import '../models/card_model.dart';
@@ -25,23 +26,25 @@ class ScannedResultPage extends ConsumerWidget {
     final worker = sync.workers.firstWhere((w) => w.id == qrData.workerId);
     final operation = sync.operations.firstWhere(
       (o) => o.id == worker.operationId,
-      orElse: () => OperationModel(
-        id: '',
-        name: 'Unknown',
-        description: '',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      ),
+      orElse:
+          () => OperationModel(
+            id: '',
+            name: 'Unknown',
+            description: '',
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
     );
     final farm = sync.farms.firstWhere(
       (f) => f.id == worker.farmId,
-      orElse: () => FarmModel(
-        id: '',
-        name: 'Unknown',
-        location: '',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      ),
+      orElse:
+          () => FarmModel(
+            id: '',
+            name: 'Unknown',
+            location: '',
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
     );
 
     final primary = Theme.of(context).colorScheme.primary;
@@ -54,31 +57,38 @@ class ScannedResultPage extends ConsumerWidget {
           Expanded(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 32,
+                ),
                 child: Column(
                   children: [
-                    CircleAvatar(
-                      radius: 120,
-                      backgroundImage: NetworkImage(worker.profileImageUrl),
-                      backgroundColor: Colors.grey.shade200,
-                    ),
+                    Center(child: ProfileImage(worker: worker, radius: 64)),
                     const SizedBox(height: 16),
                     Text(
                       '${worker.firstName} ${worker.lastName}',
                       style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 8),
-                    Text('Employee #: ${worker.employeeNumber}',
-                        style: Theme.of(context).textTheme.bodyMedium),
-                    Text('ID #:         ${worker.idNumber}',
-                        style: Theme.of(context).textTheme.bodyMedium),
+                    Text(
+                      'Employee #: ${worker.employeeNumber}',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    Text(
+                      'ID #:         ${worker.idNumber}',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
                     const SizedBox(height: 8),
-                    Text('Operation: ${operation.name}',
-                        style: Theme.of(context).textTheme.bodyMedium),
-                    Text('Farm:       ${farm.name}',
-                        style: Theme.of(context).textTheme.bodyMedium),
+                    Text(
+                      'Operation: ${operation.name}',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    Text(
+                      'Farm:       ${farm.name}',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
                   ],
                 ),
               ),
@@ -98,20 +108,25 @@ class ScannedResultPage extends ConsumerWidget {
                     _buildActionButton(
                       context,
                       label: 'Transact',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => TransactionPage(worker: worker)),
-                      ),
+                      onTap:
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => TransactionPage(worker: worker),
+                            ),
+                          ),
                     ),
                     const SizedBox(width: 16),
                     _buildActionButton(
                       context,
                       label: 'Change Operation',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const _ChangeOperationPage()),
-                      ),
+                      onTap:
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const _ChangeOperationPage(),
+                            ),
+                          ),
                       minWidth: 140,
                     ),
                   ],
@@ -122,10 +137,13 @@ class ScannedResultPage extends ConsumerWidget {
                     _buildActionButton(
                       context,
                       label: 'Settle',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const _SettlePage()),
-                      ),
+                      onTap:
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const _SettlePage(),
+                            ),
+                          ),
                       minWidth: 120,
                     ),
                   ],
@@ -158,22 +176,20 @@ class ScannedResultPage extends ConsumerWidget {
   }
 }
 
-
-
 class _ChangeOperationPage extends StatelessWidget {
   const _ChangeOperationPage();
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Change Operation')),
-        body: const Center(child: Text('Change Operation Page')),
-      );
+    appBar: AppBar(title: const Text('Change Operation')),
+    body: const Center(child: Text('Change Operation Page')),
+  );
 }
 
 class _SettlePage extends StatelessWidget {
   const _SettlePage();
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Settle')),
-        body: const Center(child: Text('Settle Page')),
-      );
+    appBar: AppBar(title: const Text('Settle')),
+    body: const Center(child: Text('Settle Page')),
+  );
 }

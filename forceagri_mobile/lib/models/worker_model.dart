@@ -1,4 +1,3 @@
-// lib/models/worker_model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class WorkerModel {
@@ -16,6 +15,7 @@ class WorkerModel {
   final bool isActive;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final DateTime photoUpdatedAt;  
 
   WorkerModel({
     required this.id,
@@ -32,6 +32,7 @@ class WorkerModel {
     required this.isActive,
     required this.createdAt,
     required this.updatedAt,
+    required this.photoUpdatedAt, 
   });
 
   factory WorkerModel.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -55,6 +56,9 @@ class WorkerModel {
                           ?? DateTime.fromMillisecondsSinceEpoch(0),
       updatedAt:        (data['updatedAt']     as Timestamp?)?.toDate()
                           ?? DateTime.fromMillisecondsSinceEpoch(0),
+      photoUpdatedAt:   (data['photoUpdatedAt'] as Timestamp?)?.toDate()
+                          ?? (data['updatedAt'] as Timestamp?)?.toDate()
+                          ?? DateTime.fromMillisecondsSinceEpoch(0),
     );
   }
 
@@ -73,6 +77,7 @@ class WorkerModel {
       'isActive':         isActive,
       'createdAt':        Timestamp.fromDate(createdAt),
       'updatedAt':        Timestamp.fromDate(updatedAt),
+      'photoUpdatedAt':   Timestamp.fromDate(photoUpdatedAt),
     };
   }
 }

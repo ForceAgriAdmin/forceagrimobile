@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forceagri_mobile/widgets/profile_image.dart';
 
 import '../models/worker_model.dart';
 import '../models/operation_model.dart';
@@ -18,18 +19,26 @@ class WorkerDetailPage extends ConsumerWidget {
 
     final operation = sync.operations.firstWhere(
       (o) => o.id == worker.operationId,
-      orElse: () => OperationModel(
-        id: '', name: 'Unknown', description: '',
-        createdAt: DateTime.now(), updatedAt: DateTime.now(),
-      ),
+      orElse:
+          () => OperationModel(
+            id: '',
+            name: 'Unknown',
+            description: '',
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
     );
 
     final farm = sync.farms.firstWhere(
       (f) => f.id == worker.farmId,
-      orElse: () => FarmModel(
-        id: '', name: 'Unknown', location: '',
-        createdAt: DateTime.now(), updatedAt: DateTime.now(),
-      ),
+      orElse:
+          () => FarmModel(
+            id: '',
+            name: 'Unknown',
+            location: '',
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
     );
 
     final workerType = sync.workerTypes.firstWhere(
@@ -49,10 +58,8 @@ class WorkerDetailPage extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Center(
-                    child: CircleAvatar(
-                      radius: 64,
-                      backgroundImage: NetworkImage(worker.profileImageUrl),
-                      backgroundColor: Colors.grey.shade200,
+                    child: Center(
+                      child: ProfileImage(worker: worker, radius: 64),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -73,7 +80,9 @@ class WorkerDetailPage extends ConsumerWidget {
                   const SizedBox(height: 8),
                   Text('Farm:          ${farm.name}'),
                   const SizedBox(height: 8),
-                  Text('Status:        ${worker.isActive ? 'Active' : 'Inactive'}'),
+                  Text(
+                    'Status:        ${worker.isActive ? 'Active' : 'Inactive'}',
+                  ),
                   if (worker.paymentGroupIds.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     Text('Payment Groups: ${worker.paymentGroupIds.length}'),
@@ -94,21 +103,25 @@ class WorkerDetailPage extends ConsumerWidget {
                     _buildActionButton(
                       context,
                       label: 'Transact',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => TransactionPage(worker: worker),
-                        ),
-                      ),
+                      onTap:
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => TransactionPage(worker: worker),
+                            ),
+                          ),
                     ),
                     const SizedBox(width: 16),
                     _buildActionButton(
                       context,
                       label: 'Change Operation',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const _ChangeOperationPage()),
-                      ),
+                      onTap:
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const _ChangeOperationPage(),
+                            ),
+                          ),
                       minWidth: 140,
                     ),
                   ],
@@ -119,10 +132,13 @@ class WorkerDetailPage extends ConsumerWidget {
                     _buildActionButton(
                       context,
                       label: 'Settle',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const _SettlePage()),
-                      ),
+                      onTap:
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const _SettlePage(),
+                            ),
+                          ),
                       minWidth: 120,
                     ),
                   ],
@@ -159,16 +175,16 @@ class _ChangeOperationPage extends StatelessWidget {
   const _ChangeOperationPage();
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Change Operation')),
-        body: const Center(child: Text('Change Operation Page')),
-      );
+    appBar: AppBar(title: const Text('Change Operation')),
+    body: const Center(child: Text('Change Operation Page')),
+  );
 }
 
 class _SettlePage extends StatelessWidget {
   const _SettlePage();
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Settle')),
-        body: const Center(child: Text('Settle Page')),
-      );
+    appBar: AppBar(title: const Text('Settle')),
+    body: const Center(child: Text('Settle Page')),
+  );
 }

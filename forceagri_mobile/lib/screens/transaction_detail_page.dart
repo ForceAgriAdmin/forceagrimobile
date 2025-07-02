@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forceagri_mobile/models/transaction_type_model.dart';
+import 'package:forceagri_mobile/widgets/profile_image.dart';
 import 'package:printing/printing.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
@@ -71,11 +72,7 @@ class TransactionDetailPage extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
-              child: CircleAvatar(
-                radius: 48,
-                backgroundImage: NetworkImage(worker.profileImageUrl),
-                backgroundColor: Colors.grey.shade200,
-              ),
+              child: ProfileImage(worker: worker, radius: 64),
             ),
             const SizedBox(height: 16),
 

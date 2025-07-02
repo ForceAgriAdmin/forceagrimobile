@@ -1,6 +1,7 @@
 // lib/screens/transactions_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forceagri_mobile/widgets/profile_image.dart';
 import 'package:intl/intl.dart';
 
 import '../models/transaction_model.dart';
@@ -8,7 +9,7 @@ import '../providers.dart';
 import 'transaction_detail_page.dart';
 
 class TransactionsPage extends ConsumerWidget {
-  const TransactionsPage({Key? key}) : super(key: key);
+  const TransactionsPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -79,7 +80,6 @@ class TransactionsPage extends ConsumerWidget {
     final fmtDisplayDate = DateFormat('yyyy-MM-dd');
 
     return Scaffold(
-      appBar: AppBar(title: const Text('All Transactions')),
       body: txnsAsync.when(
         data: (txns) {
           // apply filters
@@ -131,11 +131,7 @@ class TransactionsPage extends ConsumerWidget {
                     final color     = t.amount < 0 ? Colors.red : Colors.green;
 
                     return ListTile(
-                      leading: CircleAvatar(
-                        backgroundImage:
-                            NetworkImage(worker.profileImageUrl),
-                        backgroundColor: Colors.grey.shade200,
-                      ),
+                      leading: ProfileImage(worker: worker, radius: 20),
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(

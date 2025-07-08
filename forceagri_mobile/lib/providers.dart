@@ -2,6 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:forceagri_mobile/services/connectivity_service.dart';
+import 'package:forceagri_mobile/services/snackbar_service.dart';
 
 import 'models/transaction_model.dart';
 import 'models/transaction_type_model.dart';
@@ -36,6 +37,10 @@ final transactionTypesProvider =
     Provider<List<TransactionTypeModel>>((ref) {
   return ref.watch(firestoreSyncServiceProvider).transactionTypes;
 });
+
+final snackBarServiceProvider = Provider(
+  (ref) => SnackBarService(rootScaffoldMessengerKey),
+);
 
 /// 4️⃣ Transaction filtering & search
 enum TransactionFilter { today, yesterday, thisWeek, all }

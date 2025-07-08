@@ -1,12 +1,14 @@
 // lib/screens/transactions_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forceagri_mobile/widgets/profile_image.dart';
 import 'package:intl/intl.dart';
 
+import '../theme.dart';                      // ← for AppColors
 import '../models/transaction_model.dart';
 import '../providers.dart';
 import 'transaction_detail_page.dart';
+import 'package:forceagri_mobile/widgets/profile_image.dart';
 
 class TransactionsPage extends ConsumerWidget {
   const TransactionsPage({super.key});
@@ -23,7 +25,6 @@ class TransactionsPage extends ConsumerWidget {
     final typeMap   = { for (var t in types) t.id: t.name };
 
     DateTime startOfDay(DateTime d) => DateTime(d.year, d.month, d.day);
-
     DateTime startDate() {
       final now = DateTime.now();
       switch (filter) {
@@ -37,11 +38,10 @@ class TransactionsPage extends ConsumerWidget {
           return DateTime.fromMillisecondsSinceEpoch(0);
       }
     }
-
     DateTime endDate() =>
-        filter == TransactionFilter.yesterday
-            ? startOfDay(DateTime.now())
-            : DateTime.now();
+      filter == TransactionFilter.yesterday
+        ? startOfDay(DateTime.now())
+        : DateTime.now();
 
     List<TransactionModel> applyDateFilter(List<TransactionModel> list) {
       final s = startDate(), e = endDate();
@@ -55,13 +55,13 @@ class TransactionsPage extends ConsumerWidget {
       if (query.isEmpty) return list;
       final fmtDate = DateFormat('yyyy-MM-dd');
       return list.where((t) {
-        final worker = sync.workers.firstWhere((w) => w.id == t.workerIds[0]);
+        final worker    = sync.workers.firstWhere((w) => w.id == t.workerIds[0]);
         final operation = sync.operations.firstWhere((o) => o.id == t.operationIds[0]);
-        final name = '${worker.firstName} ${worker.lastName}'.toLowerCase();
-        final opName = operation.name.toLowerCase();
-        final id = t.id.toLowerCase();
-        final dateStr = fmtDate.format(t.timestamp).toLowerCase();
-        final amtStr = t.amount.abs().toStringAsFixed(2).toLowerCase();
+        final name      = '${worker.firstName} ${worker.lastName}'.toLowerCase();
+        final opName    = operation.name.toLowerCase();
+        final id        = t.id.toLowerCase();
+        final dateStr   = fmtDate.format(t.timestamp).toLowerCase();
+        final amtStr    = t.amount.abs().toStringAsFixed(2).toLowerCase();
         return name.contains(query) ||
                opName.contains(query) ||
                id.contains(query) ||
@@ -70,27 +70,41 @@ class TransactionsPage extends ConsumerWidget {
       }).toList();
     }
 
-    Widget chip(String label, TransactionFilter value) => ChoiceChip(
-          label: Text(label),
-          selected: filter == value,
-          onSelected: (_) =>
-              ref.read(transactionFilterProvider.notifier).state = value,
-        );
+    // RESTYLED ChoiceChip for date filters
+    Widget chip(String label, TransactionFilter value) {
+      final isSelected = filter == value;
+      return ChoiceChip(
+        label: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? AppColors.primary : Colors.black87,
+          ),
+        ),
+        selected: isSelected,
+        onSelected: (_) =>
+          ref.read(transactionFilterProvider.notifier).state = value,
+        backgroundColor: Colors.white,
+        selectedColor: AppColors.fieldFill,
+        shape: StadiumBorder(
+          side: BorderSide(
+            color: isSelected ? AppColors.primary : Colors.grey.shade300,
+          ),
+        ),
+      );
+    }
 
     final fmtDisplayDate = DateFormat('yyyy-MM-dd');
 
     return Scaffold(
       body: txnsAsync.when(
         data: (txns) {
-          // apply filters
           var list = applyDateFilter(txns);
           list = applySearch(list);
-          // remove 'settle' transactions
           list = list.where((t) => typeMap.containsKey(t.transactionTypeId)).toList();
 
           return Column(
             children: [
-              // Search bar
+              // Search bar (kept default or restyle similarly if desired)
               Padding(
                 padding: const EdgeInsets.all(8),
                 child: TextField(
@@ -100,11 +114,11 @@ class TransactionsPage extends ConsumerWidget {
                     border: OutlineInputBorder(),
                   ),
                   onChanged: (v) =>
-                      ref.read(transactionSearchProvider.notifier).state = v,
+                    ref.read(transactionSearchProvider.notifier).state = v,
                 ),
               ),
 
-              // Filter chips
+              // Filter chips row
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Wrap(
@@ -118,13 +132,13 @@ class TransactionsPage extends ConsumerWidget {
                 ),
               ),
 
-              // List
+              // Transaction list
               Expanded(
                 child: ListView.separated(
                   itemCount: list.length,
                   separatorBuilder: (_, __) => const Divider(),
                   itemBuilder: (ctx, i) {
-                    final t = list[i];
+                    final t         = list[i];
                     final worker    = sync.workers.firstWhere((w) => w.id == t.workerIds[0]);
                     final operation = sync.operations.firstWhere((o) => o.id == t.operationIds[0]);
                     final typeName  = typeMap[t.transactionTypeId] ?? '';
@@ -174,4 +188,3 @@ class TransactionsPage extends ConsumerWidget {
     );
   }
 }
-

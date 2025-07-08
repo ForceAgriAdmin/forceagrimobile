@@ -2,14 +2,15 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forceagri_mobile/widgets/profile_image.dart';
 
+import '../theme.dart';
 import '../models/worker_model.dart';
 import '../models/operation_model.dart';
 import '../models/farm_model.dart';
 import '../models/worker_type_model.dart';
 import '../providers.dart';
 import 'transaction_page.dart';
+import 'package:forceagri_mobile/widgets/profile_image.dart';
 
 class WorkerDetailPage extends ConsumerWidget {
   final WorkerModel worker;
@@ -19,28 +20,21 @@ class WorkerDetailPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final sync = ref.watch(firestoreSyncServiceProvider);
 
+    // look up operation, farm, type
     final operation = sync.operations.firstWhere(
       (o) => o.id == worker.operationId,
-      orElse:
-          () => OperationModel(
-            id: '',
-            name: 'Unknown',
-            description: '',
-            createdAt: DateTime.now(),
-            updatedAt: DateTime.now(),
-          ),
+      orElse: () => OperationModel(
+        id: '', name: 'Unknown', description: '',
+        createdAt: DateTime.now(), updatedAt: DateTime.now(),
+      ),
     );
 
     final farm = sync.farms.firstWhere(
       (f) => f.id == worker.farmId,
-      orElse:
-          () => FarmModel(
-            id: '',
-            name: 'Unknown',
-            location: '',
-            createdAt: DateTime.now(),
-            updatedAt: DateTime.now(),
-          ),
+      orElse: () => FarmModel(
+        id: '', name: 'Unknown', location: '',
+        createdAt: DateTime.now(), updatedAt: DateTime.now(),
+      ),
     );
 
     final workerType = sync.workerTypes.firstWhere(
@@ -48,158 +42,157 @@ class WorkerDetailPage extends ConsumerWidget {
       orElse: () => WorkerTypeModel(id: '', description: 'Unknown'),
     );
 
-    // Format the balance
-    final balanceText =
-        'Balance: N\$${worker.currentBalance.toStringAsFixed(2)}';
+    // format balance
+    final balanceColor = worker.currentBalance >= 0
+        ? Colors.green.shade700
+        : Colors.red.shade700;
+    final balanceText = 'N\$${worker.currentBalance.toStringAsFixed(2)}';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Worker Details')),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(child: ProfileImage(worker: worker, radius: 64)),
-                  Center(
-                    child: Chip(
-                      label: Text(
-                        worker.isActive ? 'Active' : 'Inactive',
-                        style: TextStyle(
-                          color:
-                              worker.isActive
-                                  ? Colors.green.shade800
-                                  : Colors.red.shade800,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      backgroundColor:
-                          worker.isActive
-                              ? Colors.green.shade100
-                              : Colors.red.shade100,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 0,
-                      ),
-                      visualDensity: VisualDensity.compact,
-                      shape: StadiumBorder(
-                        side: BorderSide(
-                          color:
-                              worker.isActive
-                                  ? Colors.green.shade800
-                                  : Colors.red.shade800,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Center(
-                    child: Text(
-                      '${worker.firstName} ${worker.lastName}',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Existing fields
-                  Text('Employee #: ${worker.employeeNumber}'),
-                  const SizedBox(height: 8),
-                  Text('ID #:           ${worker.idNumber}'),
-                  const SizedBox(height: 8),
-                  Text('Type:          ${workerType.description}'),
-                  const SizedBox(height: 8),
-                  Text('Operation:     ${operation.name}'),
-                  const SizedBox(height: 8),
-                  Text('Farm:          ${farm.name}'),
-                  const SizedBox(height: 8),
-                  if (worker.paymentGroupIds.isNotEmpty) ...[
-                    Text('Payment Groups: ${worker.paymentGroupIds.length}'),
-                  ],
-
-                  const SizedBox(height: 8),
-                  // ← New balance line
-                  Text(
-                    balanceText,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color:
-                          worker.currentBalance >= 0
-                              ? Colors.green.shade700
-                              : Colors.red.shade700,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                ],
+      backgroundColor: AppColors.background,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // 1) Profile & status pill
+            ProfileImage(worker: worker, radius: 64),
+            const SizedBox(height: 16),
+            Chip(
+              label: Text(
+                worker.isActive ? 'Active' : 'In-Active',
+                style: const TextStyle(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              backgroundColor: AppColors.fieldFill,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              visualDensity: VisualDensity.compact,
+              shape: const StadiumBorder(
+                side: BorderSide(color: AppColors.primary),
               ),
             ),
-          ),
+            const SizedBox(height: 16),
 
-          const Divider(height: 1),
+            // 2) Name
+            Text(
+              '${worker.firstName} ${worker.lastName}',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 24),
 
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            child: Column(
+            // 3) Balance under name
+            Text(
+              balanceText,
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 30,
+                    color: balanceColor,
+                  ),
+            ),
+            const SizedBox(height: 24),
+
+            // 4) Action cards
+            Row(
               children: [
-                Row(
-                  children: [
-                    _buildActionButton(
-                      context,
-                      label: 'Transact',
-                      onTap:
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => TransactionPage(worker: worker),
-                            ),
-                          ),
+                _buildActionCard(
+                  context,
+                  label: 'Transact',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => TransactionPage(worker: worker),
                     ),
-                    const SizedBox(width: 16),
-                    _buildActionButton(
-                      context,
-                      label: 'Change Operation',
-                      onTap: () => {},
-                      minWidth: 140,
-                    ),
-                  ],
+                  ),
                 ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    _buildActionButton(
-                      context,
-                      label: 'Settle',
-                      onTap: () => {},
-                      minWidth: 120,
-                    ),
-                  ],
+                const SizedBox(width: 12),
+                _buildActionCard(
+                  context,
+                  label: 'Change\nOperation',
+                  onTap: () {/* TODO */},
+                ),
+                const SizedBox(width: 12),
+                _buildActionCard(
+                  context,
+                  label: 'Settle',
+                  onTap: () {/* TODO */},
                 ),
               ],
             ),
-          ),
-        ],
+            const SizedBox(height: 32),
+
+            // 5) Center-aligned details with bold labels
+            _centeredDetail('Employee #:', worker.employeeNumber),
+            const SizedBox(height: 8),
+            _centeredDetail('ID #:', worker.idNumber),
+            const SizedBox(height: 8),
+            _centeredDetail('Type:', workerType.description),
+            const SizedBox(height: 8),
+            _centeredDetail('Operation:', operation.name),
+            const SizedBox(height: 8),
+            _centeredDetail('Farm:', farm.name),
+            if (worker.paymentGroupIds.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              _centeredDetail('Pay Groups:', '${worker.paymentGroupIds.length}'),
+            ],
+            const SizedBox(height: 32),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildActionButton(
+  /// A RichText widget with a bold label and normal-weight value, centered.
+  Widget _centeredDetail(String label, String value) {
+    return Center(
+      child: RichText(
+        text: TextSpan(
+          style: const TextStyle(fontSize: 16, color: Colors.black87),
+          children: [
+            TextSpan(
+              text: '$label ',
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            TextSpan(
+              text: value,
+              style: const TextStyle(fontWeight: FontWeight.w400),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// The green action cards under the name.
+  Widget _buildActionCard(
     BuildContext context, {
     required String label,
     required VoidCallback onTap,
-    double minWidth = 120,
   }) {
-    final primary = Theme.of(context).colorScheme.primary;
-    return OutlinedButton(
-      onPressed: onTap,
-      style: OutlinedButton.styleFrom(
-        minimumSize: Size(minWidth, 40),
-        side: BorderSide(color: primary),
-        shape: const StadiumBorder(),
-        foregroundColor: primary,
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: 80,
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ),
       ),
-      child: Text(label),
     );
   }
 }

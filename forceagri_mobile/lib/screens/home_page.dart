@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:forceagri_mobile/theme.dart';
 
 import '../providers.dart';
 import '../services/connectivity_service.dart';
@@ -90,13 +91,15 @@ class HomePage extends ConsumerWidget {
       body: _tabs[idx],
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.qr_code_scanner),
+        backgroundColor: AppColors.fieldFill,  // pale green fill
+       foregroundColor: AppColors.primary,     // primary green icon
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const QRScannerPage()),
           );
         },
+        child: const Icon(Icons.qr_code_scanner),
       ),
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),

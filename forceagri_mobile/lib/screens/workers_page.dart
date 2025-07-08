@@ -1,9 +1,12 @@
+// lib/screens/workers_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/worker_model.dart';
 import '../models/worker_type_model.dart';
 import '../providers.dart';
+import '../theme.dart';                   // ← for AppColors
 import 'worker_detail_page.dart';
 import 'package:forceagri_mobile/widgets/profile_image.dart';
 
@@ -15,54 +18,50 @@ class WorkersPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sync = ref.watch(firestoreSyncServiceProvider);
-    final types = sync.workerTypes;
-    final workers = sync.workers;
-    final filterId = ref.watch(workerTypeFilterProvider);
-    final showInactive = ref.watch(showInactiveProvider);
-    final query = ref.watch(workerSearchProvider).toLowerCase();
-    // Apply active/inactive and type filters
-    var list =
-        workers.where((w) {
-          if (!showInactive && !w.isActive) return false;
-          if (filterId != null && w.workerTypeId != filterId) return false;
-          return true;
-        }).toList();
+    final sync        = ref.watch(firestoreSyncServiceProvider);
+    final types       = sync.workerTypes;
+    final workers     = sync.workers;
+    final filterId    = ref.watch(workerTypeFilterProvider);
+    final showInactive= ref.watch(showInactiveProvider);
+    final query       = ref.watch(workerSearchProvider).toLowerCase();
 
-    // Apply search filter
-    list =
-        list.where((w) {
-          final name = '${w.firstName} ${w.lastName}'.toLowerCase();
-          return name.contains(query) ||
-              w.employeeNumber.toLowerCase().contains(query);
-        }).toList();
+    // apply filters...
+    var list = workers.where((w) {
+      if (!showInactive && !w.isActive) return false;
+      if (filterId != null && w.workerTypeId != filterId) return false;
+      return true;
+    }).toList();
 
-    Widget chip(String label, String? value) => ChoiceChip(
-      label: Text(label),
-      selected: filterId == value,
-      onSelected:
-          (_) => ref.read(workerTypeFilterProvider.notifier).state = value,
-    );
+    list = list.where((w) {
+      final name = '${w.firstName} ${w.lastName}'.toLowerCase();
+      return name.contains(query) ||
+             w.employeeNumber.toLowerCase().contains(query);
+    }).toList();
+
+    // RESTYLED ChoiceChip
+    Widget chip(String label, String? value) {
+      final isSelected = filterId == value;
+      return ChoiceChip(
+        label: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? AppColors.primary : Colors.black87,
+          ),
+        ),
+        selected: isSelected,
+        onSelected: (_) =>
+          ref.read(workerTypeFilterProvider.notifier).state = value,
+        backgroundColor: Colors.white,
+        selectedColor: AppColors.fieldFill,
+        shape: StadiumBorder(
+          side: BorderSide(
+            color: isSelected ? AppColors.primary : Colors.grey.shade300,
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
-      // appBar: AppBar(
-      //   actions: [
-      //     Padding(
-      //       padding: const EdgeInsets.symmetric(horizontal: 8),
-      //       child: Row(
-      //         children: [
-      //           const Text('Show Inactive'),
-      //           Switch(
-      //             value: showInactive,
-      //             onChanged:
-      //                 (val) =>
-      //                     ref.read(showInactiveProvider.notifier).state = val,
-      //           ),
-      //         ],
-      //       ),
-      //     ),
-      //   ],
-      // ),
       body: Column(
         children: [
           // Search bar
@@ -74,8 +73,8 @@ class WorkersPage extends ConsumerWidget {
                 prefixIcon: Icon(Icons.search),
                 border: OutlineInputBorder(),
               ),
-              onChanged:
-                  (v) => ref.read(workerSearchProvider.notifier).state = v,
+              onChanged: (v) =>
+                ref.read(workerSearchProvider.notifier).state = v,
             ),
           ),
 
@@ -98,42 +97,35 @@ class WorkersPage extends ConsumerWidget {
               separatorBuilder: (_, __) => const Divider(),
               itemBuilder: (ctx, i) {
                 final w = list[i];
-                final isActive = w.isActive;
-                final badgeColor =
-                    isActive ? Colors.green.shade100 : Colors.red.shade100;
-                final badgeTextColor =
-                    isActive ? Colors.green.shade800 : Colors.red.shade800;
 
+                // RESTYLED Active/Inactive badge
+                final badgeLabel = w.isActive ? 'Active' : 'In-Active';
                 return ListTile(
                   leading: ProfileImage(worker: w, radius: 20),
                   title: Text('${w.firstName} ${w.lastName}'),
                   subtitle: Text('Emp#: ${w.employeeNumber}'),
                   trailing: Chip(
                     label: Text(
-                      isActive ? 'Active' : 'In-Active',
-                      style: TextStyle(
-                        color: badgeTextColor,
+                      badgeLabel,
+                      style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
                       ),
                     ),
-                    backgroundColor: badgeColor,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 0,
-                    ),
+                    backgroundColor: AppColors.fieldFill,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
                     visualDensity: VisualDensity.compact,
-                    shape: StadiumBorder(
-                      side: BorderSide(color: badgeTextColor),
+                    shape: const StadiumBorder(
+                      side: BorderSide(color: AppColors.primary),
                     ),
                   ),
-                  onTap:
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => WorkerDetailPage(worker: w),
-                        ),
-                      ),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => WorkerDetailPage(worker: w),
+                    ),
+                  ),
                 );
               },
             ),

@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:forceagri_mobile/screens/add_worker_page.dart';
 import 'package:forceagri_mobile/theme.dart';
 
 import '../providers.dart';
@@ -62,18 +63,20 @@ class HomePage extends ConsumerWidget {
             child: Icon(Icons.circle, size: 16, color: c),
           );
         },
-        loading: () => const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.0),
-          child: SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-        ),
-        error: (_, __) => const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.0),
-          child: Icon(Icons.offline_bolt, size: 16, color: Colors.red),
-        ),
+        loading:
+            () => const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12.0),
+              child: SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+        error:
+            (_, __) => const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12.0),
+              child: Icon(Icons.offline_bolt, size: 16, color: Colors.red),
+            ),
       );
     }
 
@@ -81,6 +84,16 @@ class HomePage extends ConsumerWidget {
       appBar: AppBar(
         title: Text(_titles[idx]),
         actions: [
+          if (idx == 1)
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => AddWorkerPage()),
+                );
+              },
+            ),
           connectionIndicator(),
           IconButton(
             icon: const Icon(Icons.logout),
@@ -91,8 +104,8 @@ class HomePage extends ConsumerWidget {
       body: _tabs[idx],
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.fieldFill,  // pale green fill
-       foregroundColor: AppColors.primary,     // primary green icon
+        backgroundColor: AppColors.fieldFill, // pale green fill
+        foregroundColor: AppColors.primary, // primary green icon
         onPressed: () {
           Navigator.push(
             context,
@@ -109,11 +122,12 @@ class HomePage extends ConsumerWidget {
             return Expanded(
               child: IconButton(
                 icon: Icon(_icons[i]),
-                color: idx == i
-                    ? Theme.of(context).colorScheme.primary
-                    : Colors.grey,
-                onPressed: () =>
-                    ref.read(bottomNavIndexProvider.notifier).state = i,
+                color:
+                    idx == i
+                        ? Theme.of(context).colorScheme.primary
+                        : Colors.grey,
+                onPressed:
+                    () => ref.read(bottomNavIndexProvider.notifier).state = i,
               ),
             );
           }),

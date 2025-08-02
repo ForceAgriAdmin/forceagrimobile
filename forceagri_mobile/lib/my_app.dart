@@ -12,7 +12,6 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authStateProvider);
-    ref.read(firestoreSyncServiceProvider);
 
     return MaterialApp(
       scaffoldMessengerKey: rootScaffoldMessengerKey,
@@ -20,9 +19,14 @@ class MyApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: appTheme,
       home: authState.when(
-        data: (user) => user != null
-            ? HomePage(user: user)
-            : const LoginPage(),
+        data: (user) {
+          if (user != null) {
+            ref.read(firestoreSyncServiceProvider); // 👈 Only start sync after login
+            return HomePage(user: user);
+          } else {
+            return const LoginPage();
+          }
+        },
         loading: () => const Scaffold(
           body: Center(child: CircularProgressIndicator()),
         ),

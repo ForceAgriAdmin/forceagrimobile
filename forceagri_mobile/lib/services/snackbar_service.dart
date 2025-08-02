@@ -28,7 +28,7 @@ class SnackBarService {
 
   /// Green / primary
   void showSuccess(String message) {
-    _show(message, AppColors.primary);
+    _show(message, Colors.green);
   }
 
   /// Amber / warning

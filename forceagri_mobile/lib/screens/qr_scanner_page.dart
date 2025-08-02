@@ -52,8 +52,11 @@ class _QRScannerPageState extends ConsumerState<QRScannerPage> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+    ref
+        .read(snackBarServiceProvider)
+        .showError(
+          message,
+        );
     _isScanning = true;
   }
 

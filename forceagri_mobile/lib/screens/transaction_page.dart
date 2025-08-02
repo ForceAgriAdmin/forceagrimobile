@@ -9,14 +9,14 @@ import '../providers.dart';
 
 class TransactionPage extends ConsumerStatefulWidget {
   final WorkerModel worker;
-  const TransactionPage({ required this.worker, super.key });
+  const TransactionPage({required this.worker, super.key});
 
   @override
   ConsumerState<TransactionPage> createState() => _TransactionPageState();
 }
 
 class _TransactionPageState extends ConsumerState<TransactionPage> {
-  final _formKey    = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
   TransactionTypeModel? _selectedType;
   final _amountCtrl = TextEditingController();
 
@@ -28,30 +28,33 @@ class _TransactionPageState extends ConsumerState<TransactionPage> {
 
   void _submit() {
     if (_selectedType == null || !_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please pick a type and enter a valid amount')),
-      );
+      ref
+        .read(snackBarServiceProvider)
+        .showWarning(
+          'Please pick a type and enter a valid amount',
+        );
       return;
     }
     final amount = double.parse(_amountCtrl.text);
 
-    ref.read(transactionServiceProvider).addTransactionForWorker(
-      worker: widget.worker,
-      transactionType: _selectedType!,
-      amount: amount,
-      creatorId: ref.read(authStateProvider).value!.uid,
-      description: '',
-    ).catchError((e) {
-      debugPrint('Transaction sync error: $e');
-    });
+    ref
+        .read(transactionServiceProvider)
+        .addTransactionForWorker(
+          worker: widget.worker,
+          transactionType: _selectedType!,
+          amount: amount,
+          creatorId: ref.read(authStateProvider).value!.uid,
+          description: '',
+        )
+        .catchError((e) {
+          debugPrint('Transaction sync error: $e');
+        });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
+    ref
+        .read(snackBarServiceProvider)
+        .showSuccess(
           'N\$${amount.toStringAsFixed(2)} ${_selectedType!.name} queued',
-        ),
-      ),
-    );
+        );
     Navigator.pop(context);
   }
 
@@ -59,7 +62,8 @@ class _TransactionPageState extends ConsumerState<TransactionPage> {
   Widget build(BuildContext context) {
     // filter out "settle" from the list
     final allTypes = ref.watch(transactionTypesProvider);
-    final types = allTypes.where((t) => t.name.toLowerCase() != 'settle').toList();
+    final types =
+        allTypes.where((t) => t.name.toLowerCase() != 'settle').toList();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Transaction')),
@@ -87,20 +91,22 @@ class _TransactionPageState extends ConsumerState<TransactionPage> {
                         labelText: 'Transaction Type',
                         border: OutlineInputBorder(),
                       ),
-                      items: types.map((t) {
-                        return DropdownMenuItem(
-                          value: t,
-                          child: Text(t.name),
-                        );
-                      }).toList(),
+                      items:
+                          types.map((t) {
+                            return DropdownMenuItem(
+                              value: t,
+                              child: Text(t.name),
+                            );
+                          }).toList(),
                       onChanged: (t) => setState(() => _selectedType = t),
                       validator: (v) => v == null ? 'Type required' : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _amountCtrl,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       decoration: const InputDecoration(
                         labelText: 'Amount (N\$)',
                         border: OutlineInputBorder(),

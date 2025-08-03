@@ -2,6 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:forceagri_mobile/services/connectivity_service.dart';
+import 'package:forceagri_mobile/services/rekognition_service.dart';
 import 'package:forceagri_mobile/services/snackbar_service.dart';
 
 import 'models/transaction_model.dart';
@@ -26,6 +27,7 @@ final authStateProvider = StreamProvider<User?>(
 final transactionServiceProvider =
     Provider<TransactionService>((ref) => TransactionService());
 final cardServiceProvider = Provider<CardService>((ref) => CardService());
+final rekognitionServiceProvider = Provider<RekognitionService>((ref) => RekognitionService());
 
 /// 2️⃣ UI state
 final rememberMeProvider     = StateProvider<bool>((ref) => false);

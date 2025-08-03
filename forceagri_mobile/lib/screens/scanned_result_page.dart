@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../theme.dart';
 import '../models/qr_data.dart';
 import '../models/card_model.dart';
-import '../models/worker_model.dart';
 import '../models/operation_model.dart';
 import '../models/farm_model.dart';
 import '../models/worker_type_model.dart';

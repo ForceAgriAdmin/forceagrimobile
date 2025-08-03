@@ -1,12 +1,12 @@
-// lib/screens/add_worker_page.dart
-
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../models/worker_model.dart';
 import '../providers.dart';
 import '../services/workers_service.dart';
+import '../theme.dart';
+import 'qr_scanner_page.dart';
 
 class AddWorkerPage extends ConsumerStatefulWidget {
   const AddWorkerPage({super.key});
@@ -17,7 +17,6 @@ class AddWorkerPage extends ConsumerStatefulWidget {
 
 class _AddWorkerPageState extends ConsumerState<AddWorkerPage> {
   final _formKey = GlobalKey<FormState>();
-  final _picker = ImagePicker();
   File? _image;
 
   final _firstNameController = TextEditingController();
@@ -46,75 +45,73 @@ class _AddWorkerPageState extends ConsumerState<AddWorkerPage> {
                 decoration: const InputDecoration(labelText: 'First Name'),
                 validator: (v) => v!.isEmpty ? 'Required' : null,
               ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _lastNameController,
                 decoration: const InputDecoration(labelText: 'Last Name'),
                 validator: (v) => v!.isEmpty ? 'Required' : null,
               ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _idNumberController,
                 decoration: const InputDecoration(labelText: 'ID Number'),
                 validator: (v) => v!.isEmpty ? 'Required' : null,
               ),
+              const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: _selectedOpId,
-                items:
-                    operations
-                        .map(
-                          (op) => DropdownMenuItem(
-                            value: op.id,
-                            child: Text(op.name),
-                          ),
-                        )
-                        .toList(),
+                items: operations
+                    .map((op) => DropdownMenuItem(
+                          value: op.id,
+                          child: Text(op.name),
+                        ))
+                    .toList(),
                 onChanged: (v) => setState(() => _selectedOpId = v),
                 decoration: const InputDecoration(labelText: 'Operation'),
               ),
+              const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: _selectedWorkerTypeId,
-                items:
-                    types
-                        .map(
-                          (type) => DropdownMenuItem(
-                            value: type.id,
-                            child: Text(type.description),
-                          ),
-                        )
-                        .toList(),
+                items: types
+                    .map((type) => DropdownMenuItem(
+                          value: type.id,
+                          child: Text(type.description),
+                        ))
+                    .toList(),
                 onChanged: (v) => setState(() => _selectedWorkerTypeId = v),
                 decoration: const InputDecoration(labelText: 'Worker Type'),
               ),
               const SizedBox(height: 16),
               _image == null
                   ? ElevatedButton.icon(
-                    onPressed: _pickImage,
-                    icon: const Icon(Icons.photo),
-                    label: const Text(
-                      'Upload Profile Picture',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                    ),
-                  )
-                  : Column(
-                    children: [
-                      Image.file(_image!, height: 150),
-                      TextButton.icon(
-                        onPressed: _pickImage,
-                        icon: const Icon(Icons.edit),
-                        label: const Text(
-                          'Change Photo',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                          ),
+                      onPressed: _captureFace,
+                      icon: const Icon(Icons.photo_camera),
+                      label: const Text(
+                        'Capture Profile Picture',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
                         ),
                       ),
-                    ],
-                  ),
+                    )
+                  : Column(
+                      children: [
+                        Image.file(_image!, height: 150),
+                        TextButton.icon(
+                          onPressed: _captureFace,
+                          icon: const Icon(Icons.edit),
+                          label: const Text(
+                            'Change Photo',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () => _submit(user?.uid ?? ''),
@@ -134,25 +131,28 @@ class _AddWorkerPageState extends ConsumerState<AddWorkerPage> {
     );
   }
 
-  Future<void> _pickImage() async {
-    final picked = await _picker.pickImage(source: ImageSource.gallery);
-    if (picked != null) {
-      setState(() => _image = File(picked.path));
+  Future<void> _captureFace() async {
+    final result = await Navigator.push<File?>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const QRScannerPage(scanFaceOnlyMode: true),
+      ),
+    );
+
+    if (result != null) {
+      setState(() => _image = result);
     }
   }
 
   Future<void> _submit(String farmId) async {
     if (!_formKey.currentState!.validate() || _image == null) {
-      ref
-        .read(snackBarServiceProvider)
-        .showWarning(
-          'Complete all fields and upload a photo.',
-        );
+      ref.read(snackBarServiceProvider).showWarning(
+          'Complete all fields and capture a photo.');
       return;
     }
 
     final worker = WorkerModel(
-      id: '', // will be generated in service
+      id: '',
       firstName: _firstNameController.text.trim(),
       lastName: _lastNameController.text.trim(),
       idNumber: _idNumberController.text.trim(),
@@ -172,19 +172,11 @@ class _AddWorkerPageState extends ConsumerState<AddWorkerPage> {
     try {
       await WorkersService().addWorker(worker: worker, profileImage: _image!);
       if (mounted) {
-        ref
-        .read(snackBarServiceProvider)
-        .showSuccess(
-          'Worker added successfully!',
-        );
+        ref.read(snackBarServiceProvider).showSuccess('Worker added successfully!');
         Navigator.pop(context);
       }
     } catch (e) {
-      ref
-        .read(snackBarServiceProvider)
-        .showError(
-          'Failed to add worker: $e',
-        );
+      ref.read(snackBarServiceProvider).showError('Failed to add worker: $e');
     }
   }
 }
